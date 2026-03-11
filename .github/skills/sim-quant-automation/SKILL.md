@@ -1,69 +1,77 @@
 ---
 name: sim-quant-automation
-description: 'Automate simulation quant research jobs in Python using akshare and akquant. Use for collecting market data, saving analysis datasets to xlsx, and generating markdown reports.'
-argument-hint: 'Describe market universe, timeframe, factors, and output folder'
+description: 'General-purpose quant research automation with AkShare and AKQuant. Build task-specific scripts, datasets, charts, and markdown reports.'
+argument-hint: 'Describe objective, market universe, timeframe, factors/strategy, and output folder'
 user-invocable: true
 disable-model-invocation: false
 ---
 
 # Sim Quant Automation
 
-This skill runs a repeatable simulation-quant workflow for Python projects using `akshare` and `akquant`, then produces:
+This skill is a **general quant analysis skill** for Python projects using `akshare` and `akquant`.
 
-1. Python execution scripts for the pipeline
-2. Data outputs saved as `.xlsx`
-3. A summary report saved as `.md`
+It should not be limited to one fixed pipeline file.  
+For each task, the agent should create a **task-specific script/workflow** and produce reproducible outputs.
 
 ## When to Use
 
-- You need a fast batch job for daily or ad-hoc quant simulation data pulls.
-- You want consistent outputs for research handoff (`data + report`).
-- You need a single command workflow that can be reused in CI or scheduled tasks.
+- Market data collection and cleaning
+- Factor/indicator construction
+- Strategy backtest experiments
+- Exportable research handoff (`xlsx + markdown + optional chart`)
 
 ## Inputs to Collect
 
 Before running, confirm:
 
-1. Target market universe (for example `A-share`, `ETF`, or a custom symbol list).
-2. Snapshot date or backtest window.
-3. Output folder path.
-4. Report language (`zh` or `en`).
+1. Research objective (snapshot, factor study, backtest, macro analysis, etc.)
+2. Target universe (A-share, ETF, futures, macro series, custom symbols)
+3. Time range / frequency
+4. Required indicators, factors, or strategy logic
+5. Output folder and deliverables (`xlsx`, `md`, chart types)
+6. Environment choice (venv/uv/current env)
 
 ## Procedure
 
-1. Validate dependencies in the active Python environment: `akshare`, `akquant`, `pandas`, `openpyxl`.
-2. Run [pipeline script](./scripts/run_sim_quant_pipeline.py) with the desired output directory.
-   - Default: AkQuant-first with AkShare fallback
-   - AkShare-only mode: `--no-akquant`
-3. Confirm output artifacts exist:
-   - `market_snapshot_YYYYMMDD.xlsx`
-   - `sim_quant_report_YYYYMMDD.md`
-4. If needed, enrich the report by adding your strategy-specific KPIs.
+1. Validate dependencies in the chosen environment: `akshare`, `akquant`, `pandas`, `openpyxl` (plus task-specific packages).
+2. Use the reference docs under `./references/` to pick APIs and design data flow.
+3. Create a task-specific runner script (for example `results/<task_name>/run_<task_name>.py`) instead of hardcoding one entrypoint.
+4. Execute the task and generate artifacts in the requested output directory.
+5. Produce at minimum:
+   - one `.xlsx` dataset
+   - one `.md` report
+6. If requested, include charting (Excel line/bar chart or plotted images) and strategy KPI summaries.
+7. Validate output quality (non-empty data, expected columns/range, readable report).
 
 ## Decision Points
 
-1. If `akquant` project connectors are configured, augment the snapshot with strategy metadata.
-2. If `akquant` is unavailable, continue with the `akshare`-only path.
-3. If dataframe columns differ from expected names, normalize columns in the collector script before report generation.
+1. Prefer `akshare` for data ingestion; use `akquant` when backtesting/execution abstractions are needed.
+2. If `akquant` is unavailable, continue in `akshare + pandas` mode.
+3. If schemas differ, normalize columns explicitly before analysis/reporting.
+4. For every new user task, generate or update a dedicated script so the workflow is reproducible.
 
 ## Completion Checks
 
-1. Pipeline exits without exceptions.
-2. `.xlsx` contains non-empty tabular data with expected columns.
-3. `.md` report includes run timestamp, row count, and top movers table.
-4. `.md` report includes turnover ranking, factor score overview (when columns exist), and signal summary.
+1. Workflow exits without exceptions.
+2. Output folder contains required files (`.xlsx`, `.md`, optional chart/image files).
+3. Data in `.xlsx` matches requested universe/time window and is non-empty.
+4. `.md` report records source APIs, assumptions, and key quantitative findings.
 
 ## Resources
 
-- [Pipeline entrypoint](./scripts/run_sim_quant_pipeline.py)
-- [Data collection module](./scripts/collect_market_data.py)
-- [Markdown report module](./scripts/build_markdown_report.py)
+- [AkShare reference](./references/akshare_reference.md)
+- [AKQuant reference](./references/akquant_reference.md)
+- [Example pipeline entrypoint](./scripts/run_sim_quant_pipeline.py)
+- [Example data collector](./scripts/collect_market_data.py)
+- [Example report module](./scripts/build_markdown_report.py)
 
 ## Example Prompts
 
-- `/sim-quant-automation Generate a daily A-share snapshot job and save outputs under outputs/daily`
-- `/sim-quant-automation Run AkShare-only mode and produce xlsx + markdown report`
-- `/sim-quant-automation Add factor columns ending with _score and include them in the markdown summary`
+- `/sim-quant-automation Build a CSI300 factor analysis job for 2022-01 to 2024-12 and export xlsx + markdown under results/csi300_factor`
+- `/sim-quant-automation Fetch China macro indicators (PMI, CPI) and create a charted xlsx report under results/macro_dashboard`
+- `/sim-quant-automation Use akshare for data + akquant for backtest, then summarize performance metrics in markdown`
 
 ## Annotations
-- Ask user for whether to use a venv or not, and if so, which one. If not, run in the current environment.
+- Ask user which environment to use (venv/uv/current env) before installation or execution.
+- Do not restrict execution to `./scripts/run_sim_quant_pipeline.py`; treat that file as an example only.
+- For each concrete user task, create a task-specific runnable script/workflow.

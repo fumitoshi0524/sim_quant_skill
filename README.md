@@ -1,53 +1,40 @@
-# Sim Quant Skill Demo Repo
+# Sim Quant Automation Skill Repository
 
 This repository shares a reusable GitHub Copilot skill: `sim-quant-automation`.
 
-The skill helps you run simulation-quant data jobs with `akshare` / `akquant` and generate:
+For each user task, the agent should create a task-specific workflow/script and output reproducible artifacts such as:
 
 - `.xlsx` datasets
-- `.md` summary reports
+- `.md` analysis reports
+- optional charts/backtest summaries
 
-Skill definition: `.github/skills/sim-quant-automation/SKILL.md`
+## Skill Location
 
-## Environment
+- Skill entry: `.github/skills/sim-quant-automation/SKILL.md`
+- Example scripts: `.github/skills/sim-quant-automation/scripts/`
+- Reference docs:
+  - `.github/skills/sim-quant-automation/references/akshare_reference.md`
+  - `.github/skills/sim-quant-automation/references/akquant_reference.md`
 
-This project uses `uv` for dependency and environment management.
+## How to Share and Use
 
-```powershell
-uv sync
+Copy `.github/skills/sim-quant-automation` into your supported skill directory (project-level or global-level), then invoke:
+
+```text
+/sim-quant-automation <your quant task request>
 ```
 
-Then run examples with `uv run ...` so commands execute inside the project environment.
+## Prompt Examples
 
-## Example Commands
+- `/sim-quant-automation Build a CSI300 factor analysis job for 2022-01 to 2024-12, export xlsx + markdown under results/csi300_factor`
+- `/sim-quant-automation Fetch PMI and CPI series from 2019-01 to 2024-12 and produce xlsx with line charts under results/macro_dashboard`
+- `/sim-quant-automation Use akshare for data and akquant for backtest, then summarize KPIs in markdown under results/strategy_eval`
 
-Run from repository root:
+## Existing Example Results
 
-### Skill prompts (recommended)
-
-- `/sim-quant-automation Generate a daily A-share snapshot job and save outputs under results/example_daily`
-- `/sim-quant-automation Run AkShare-only mode and produce xlsx + markdown report under results/example_akshare_only`
-- `/sim-quant-automation Add factor columns ending with _score and include them in the markdown summary, output to results/example_factor`
-
-### Equivalent local CLI command
-
-```powershell
-uv run python .\.github\skills\sim-quant-automation\scripts\run_sim_quant_pipeline.py --output-dir <RESULT_DIR> [--no-akquant]
-```
-
-### Factor-enriched example script
-
-```powershell
-uv run python .\results\example_factor\run_factor_example.py
-```
-
-## Output Layout
-
-All example artifacts are stored under `.\results`:
+Generated sample outputs are under `.\results`:
 
 - `results\example_daily\`
 - `results\example_akshare_only\`
 - `results\example_factor\`
-
-Each example produces an `.xlsx` data file and a `.md` report.
 
