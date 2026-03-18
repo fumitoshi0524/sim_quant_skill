@@ -61,6 +61,7 @@ Before running, confirm:
 
 - [AkShare reference](./references/akshare_reference.md)
 - [AKQuant reference](./references/akquant_reference.md)
+- [Strategy example](./references/strategy_example.py)
 - [Example pipeline entrypoint](./scripts/run_sim_quant_pipeline.py)
 - [Example data collector](./scripts/collect_market_data.py)
 - [Example report module](./scripts/build_markdown_report.py)
@@ -73,5 +74,10 @@ Before running, confirm:
 
 ## Annotations
 - Ask user which environment to use (venv/uv/current env) before installation or execution.
+- Ask user to confirm research objective, target universe, time range, indicators/strategy, and output requirements before running.
+- Ask user if they want a data analysis and prediction task or a backtest strategy task, as the workflow and outputs will differ.
 - Do not restrict execution to `./scripts/run_sim_quant_pipeline.py`; treat that file as an example only.
 - For each concrete user task, create a task-specific runnable script/workflow.
+- Ensure that the skill can handle a variety of quant research tasks, not just one fixed pipeline.
+- If the user wants a backtest strategy task, the runnable script should be designed to run the quant task only. It must focus on the strategy itself. The result evaluation and output generation must not be part of the script. The pattern of the script should follow [Strategy example](./references/strategy_example.py).
+- For backtest strategy tasks that need deployment/launch on online platforms (for example MSQuant), follow [Strategy example](./references/strategy_example.py) strictly: keep the top-level pattern of `generate_data()`, `class ... (Strategy)`, direct `run_backtest(...)`, and standard metric/DataFrame prints.
